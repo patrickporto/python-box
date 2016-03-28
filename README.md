@@ -32,7 +32,7 @@ argumentos posicionais:
 
 ##  Cliente ##
 ```shell
-usando: client.py [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
+usando: client [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
 
 argumentos posicionais:
   DIRETÓRIO       diretório para sincronização

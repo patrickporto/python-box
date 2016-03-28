@@ -45,3 +45,16 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
     def received_message(self, message):
         print(message)
+
+
+def start_server(path, host, port):
+    try:
+        ws = Client(
+            url='ws://{host}:{port}/'.format(host=host, port=port),
+            path=path,
+            protocols=['http-only', 'chat'],
+        )
+        ws.connect()
+        ws.run_forever()
+    except KeyboardInterrupt:
+        ws.close()

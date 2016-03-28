@@ -1,17 +1,17 @@
 # encoding: utf-8
 import os
 from argparse import ArgumentParser
-from websocket_server import start_server
+from websocket_client import start_server
 
 
 parser = ArgumentParser()
 parser.add_argument('directory', metavar='DIRETÓRIO', type=str,
-                    help='diretório para hospedagem e sincronização')
+                    help='diretório para sincronização')
 parser.add_argument('--host', metavar='SERVIDOR', type=str,
-                    help='endereço para execução (padrão: 0.0.0.0)',
-                    default='0.0.0.0')
+                    help='endereço do servidor (padrão: localhost)',
+                    default='localhost')
 parser.add_argument('--port', metavar='PORTA', type=int,
-                    help='porta para execução (padrão: 9000)',
+                    help='porta do servidor (padrão: 9000)',
                     default='9000')
 args = parser.parse_args()
 if not os.path.exists(args.directory) or not os.path.isdir(args.directory):
