@@ -24,7 +24,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
             'type': event.event_type,
             'is_directory': event.is_directory,
         }
-        if not event.is_directory and event.event_type == 'created':
+        if not event.is_directory and (event.event_type == 'created' or event.event_type == 'modified'):
             context['file_content'] = open(event.src_path, 'rb').read()
         context['src_path'] = event.src_path[len(self.path) + 1:]
         if hasattr(event, 'dest_path'):
