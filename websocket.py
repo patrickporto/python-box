@@ -17,6 +17,9 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.close(reason='Bye bye')
 
     def on_any_event(self, event):
+        filename = event.src_path.split('/')[-1]
+        if filename[0] == '.':
+            return
         context = {
             'type': event.event_type,
             'is_directory': event.is_directory,
