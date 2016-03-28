@@ -17,12 +17,14 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.close(reason='Bye bye')
 
     def on_any_event(self, event):
-        src = '/'.join(event.src_path.split('/')[1:])
-        self.send(json.dumps({
+        context = {
             'type': event.event_type,
-            'path': src,
             'is_directory': event.is_directory,
-        }))
+        }
+        context['src_path'] = '/'.join(event.src_path.split('/')[1:])
+        if hasattr(event, 'dest_path'):
+            context['dest_path'] = '/'.join(event.dest_path.split('/')[1:])
+        self.send(json.dumps(context))
 
     def opened(self):
         self.observer.start()
