@@ -24,6 +24,8 @@ class Client(WebSocketClient, FileSystemEventHandler):
         context = {
             'type': event.event_type,
             'is_directory': event.is_directory,
+            'file_content': '',
+            'dest_path': '',
         }
         if not event.is_directory and (event.event_type == 'created' or event.event_type == 'modified'):
             context['file_content'] = open(event.src_path, 'rb').read()
