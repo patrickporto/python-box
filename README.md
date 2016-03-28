@@ -18,7 +18,16 @@ pip install -r requirements.txt
 
 ## Servidor ##
 ```shell
-python server help
+usando: server [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
+
+argumentos posicionais:
+  DIRETÓRIO       diretório para hospedagem e sincronização
+
+  argumentos opcionais:
+  -h, --help       apenas exibe esta ajuda
+  --host SERVIDOR  endereço para execução (padrão: 0.0.0.0)
+  --port PORTA     porta para execução (padrão: 9000)
+
 ```
 
 ##  Cliente ##
