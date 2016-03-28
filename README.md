@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ## Servidor ##
 ```shell
-python server.py help
+python server help
 ```
 
 ##  Cliente ##
@@ -31,5 +31,5 @@ argumentos posicionais:
 argumentos opcionais:
   -h, --help       apenas exibe esta ajuda
   --host SERVIDOR  endereço do servidor (padrão: localhost)
-  --port PORTA     endereço do servidor (padrão: 9000)
+  --port PORTA     porta do servidor (padrão: 9000)
 ```

@@ -24,8 +24,8 @@ if __name__ == "__main__":
     parser.add_argument('--host', metavar='SERVIDOR', type=str,
                         help='endereço do servidor (padrão: localhost)',
                         default='localhost')
-    parser.add_argument('--port', metavar='PORTA', type=str,
-                        help='endereço do servidor (padrão: 9000)',
+    parser.add_argument('--port', metavar='PORTA', type=int,
+                        help='porta do servidor (padrão: 9000)',
                         default='9000')
     args = parser.parse_args()
     if not os.path.exists(args.directory) or not os.path.isdir(args.directory):
