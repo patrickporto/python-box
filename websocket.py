@@ -17,8 +17,9 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.close(reason='Bye bye')
 
     def on_any_event(self, event):
+        print(event)
         filename = event.src_path.split('/')[-1]
-        if filename[0] == '.':
+        if filename[0] == '.' and event.event_type != 'moved':
             return
         context = {
             'type': event.event_type,
@@ -27,7 +28,12 @@ class Client(WebSocketClient, FileSystemEventHandler):
         if not event.is_directory and (event.event_type == 'created' or event.event_type == 'modified'):
             context['file_content'] = open(event.src_path, 'rb').read()
         context['src_path'] = event.src_path[len(self.path) + 1:]
-        if hasattr(event, 'dest_path'):
+        is_backup = event.src_path.split('/')[-1].startswith('.goutputstream')
+        if not event.is_directory and event.event_type == 'moved' and is_backup:
+            context['type'] = 'modified'
+            context['file_content'] = open(event.dest_path, 'rb').read()
+            context['src_path'] = event.dest_path[len(self.path) + 1:]
+        elif hasattr(event, 'dest_path'):
             context['dest_path'] = event.dest_path[len(self.path) + 1:]
         self.send(json.dumps(context))
 
