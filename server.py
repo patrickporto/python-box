@@ -5,7 +5,7 @@ from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 
 
-DIRECTORY_STORAGE = '/tmp/'
+DIRECTORY_STORAGE = '/tmp/storage'
 
 
 def on_deleted(path, is_directory):

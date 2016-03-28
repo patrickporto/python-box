@@ -5,9 +5,13 @@ from watchdog.events import FileSystemEventHandler
 
 
 class Client(WebSocketClient, FileSystemEventHandler):
+    def __init__(self, path='', *args, **kwargs):
+        super(Client, self).__init__(*args, **kwargs)
+        self.path = path
+
     def opened(self):
         self.observer = Observer()
-        self.observer.schedule(self, 'test', recursive=True)
+        self.observer.schedule(self, self.path, recursive=True)
         self.observer.start()
 
     def on_any_event(self, event):
