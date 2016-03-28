@@ -21,9 +21,11 @@ class Client(WebSocketClient, FileSystemEventHandler):
             'type': event.event_type,
             'is_directory': event.is_directory,
         }
-        context['src_path'] = '/'.join(event.src_path.split('/')[1:])
+        if not event.is_directory and event.event_type == 'created':
+            context['file_content'] = open(event.src_path, 'rb').read()
+        context['src_path'] = event.src_path[len(self.path) + 1:]
         if hasattr(event, 'dest_path'):
-            context['dest_path'] = '/'.join(event.dest_path.split('/')[1:])
+            context['dest_path'] = event.dest_path[len(self.path) + 1:]
         self.send(json.dumps(context))
 
     def opened(self):

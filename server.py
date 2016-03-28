@@ -8,6 +8,18 @@ from geventwebsocket.handler import WebSocketHandler
 DIRECTORY_STORAGE = '/tmp/storage'
 
 
+def on_created(path, is_directory, file_content):
+    if is_directory:
+        os.makedirs(path)
+    else:
+        try:
+            f = open(os.path.join(DIRECTORY_STORAGE, path), "w+")
+            f.write(file_content)
+            f.close()
+        except IOError as e:
+            print('\033[91m{0}\033[0m'.format(e))
+
+
 def on_deleted(path, is_directory):
     path = os.path.join(DIRECTORY_STORAGE, path)
     if is_directory:
@@ -31,7 +43,9 @@ def websocket_app(environ, start_response):
         message = ws.receive()
         if message:
             data = json.loads(message)
-            print(data['type'])
+            print(data)
+            if data['type'] == 'created':
+                on_created(data['src_path'], data['is_directory'], data['file_content'])
             if data['type'] == 'deleted':
                 on_deleted(data['src_path'], data['is_directory'])
             if data['type'] == 'moved':
