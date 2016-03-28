@@ -8,26 +8,25 @@ from geventwebsocket.handler import WebSocketHandler
 DIRECTORY_STORAGE = '/tmp/storage'
 
 
+def _writefile(path, content):
+    try:
+        f = open(path, "wb+")
+        f.write(content)
+        f.close()
+    except IOError as e:
+        print('\033[91m{0}\033[0m'.format(e))
+
+
 def on_created(path, is_directory, file_content):
     if is_directory:
         os.makedirs(path)
     else:
-        try:
-            f = open(path, "w+")
-            f.write(file_content)
-            f.close()
-        except IOError as e:
-            print('\033[91m{0}\033[0m'.format(e))
+        _writefile(path, file_content)
 
 
 def on_modified(path, is_directory, file_content):
     if not is_directory:
-        try:
-            f = open(path, "w")
-            f.write(file_content)
-            f.close()
-        except IOError as e:
-            print('\033[91m{0}\033[0m'.format(e))
+        _writefile(path, file_content)
 
 
 def on_deleted(path, is_directory):
@@ -53,7 +52,7 @@ def websocket_app(environ, start_response):
             data = json.loads(message)
             data['src_path'] = os.path.join(DIRECTORY_STORAGE, data['src_path'])
             data['dest_path'] = os.path.join(DIRECTORY_STORAGE, data['dest_path'])
-            print(data)
+            data['file_content'] = data['file_content'].decode('uu')
             if data['type'] == 'created':
                 on_created(data['src_path'], data['is_directory'], data['file_content'])
             if data['type'] == 'modified':

@@ -17,7 +17,6 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.close(reason='Bye bye')
 
     def on_any_event(self, event):
-        print(event)
         filename = event.src_path.split('/')[-1]
         if filename[0] == '.' and event.event_type != 'moved':
             return
@@ -37,7 +36,9 @@ class Client(WebSocketClient, FileSystemEventHandler):
             context['src_path'] = event.dest_path[len(self.path) + 1:]
         elif hasattr(event, 'dest_path'):
             context['dest_path'] = event.dest_path[len(self.path) + 1:]
-        self.send(json.dumps(context))
+        print('sincronizando')
+        context['file_content'] = context['file_content'].encode('uu')
+        self.send(json.dumps(context, ensure_ascii=False))
 
     def opened(self):
         self.observer.start()
