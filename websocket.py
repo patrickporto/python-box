@@ -9,6 +9,9 @@ class Client(WebSocketClient, FileSystemEventHandler):
         super(Client, self).__init__(*args, **kwargs)
         self.path = path
 
+    def __del__(self):
+        self.close(reason='Bye bye')
+
     def opened(self):
         self.observer = Observer()
         self.observer.schedule(self, self.path, recursive=True)
