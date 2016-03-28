@@ -2,3 +2,5 @@ watchdog
 gevent-websocket
 gevent
 ws4py
+peewee
+bcrypt

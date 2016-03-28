@@ -17,28 +17,13 @@ pip install -r requirements.txt
 ```
 
 ## Servidor ##
+Executar servidor de sincronização.
 ```shell
-usando: server [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
-
-argumentos posicionais:
-  DIRETÓRIO       diretório para hospedagem e sincronização
-
-  argumentos opcionais:
-  -h, --help       apenas exibe esta ajuda
-  --host SERVIDOR  endereço para execução (padrão: 0.0.0.0)
-  --port PORTA     porta para execução (padrão: 9000)
-
+python server start pasta/de/armazenamento --host 0.0.0.0 --port 9000
 ```
 
 ##  Cliente ##
+Executar cliente para sincronização.
 ```shell
-usando: client [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
-
-argumentos posicionais:
-  DIRETÓRIO       diretório para sincronização
-
-argumentos opcionais:
-  -h, --help       apenas exibe esta ajuda
-  --host SERVIDOR  endereço do servidor (padrão: localhost)
-  --port PORTA     porta do servidor (padrão: 9000)
+python client minha/pasta/com/arquivos --host 0.0.0.0 --port 9000
 ```
