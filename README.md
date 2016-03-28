@@ -23,5 +23,13 @@ python server.py help
 
 ##  Cliente ##
 ```shell
-python client.py [-h] DIRETÓRIO
+usando: client.py [-h] [--host SERVIDOR] [--port PORTA] DIRETÓRIO
+
+argumentos posicionais:
+  DIRETÓRIO       diretório para sincronização
+
+argumentos opcionais:
+  -h, --help       apenas exibe esta ajuda
+  --host SERVIDOR  endereço do servidor (padrão: localhost)
+  --port PORTA     endereço do servidor (padrão: 9000)
 ```
