@@ -4,8 +4,6 @@ import shutil
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 
-DIRECTORY_STORAGE = '/tmp/storage'
-
 
 def _writefile(path, content):
     try:
@@ -43,30 +41,31 @@ def on_moved(src_path, dest_path):
     shutil.move(src_path, dest_path)
 
 
-def websocket_app(environ, start_response):
-    ws = environ["wsgi.websocket"]
-    while not ws.closed:
-        message = ws.receive()
-        if message:
-            data = json.loads(message)
-            data['src_path'] = os.path.join(DIRECTORY_STORAGE, data['src_path'])
-            data['dest_path'] = os.path.join(DIRECTORY_STORAGE, data['dest_path'])
-            data['file_content'] = data['file_content'].decode('uu')
-            if data['type'] == 'created':
-                on_created(data['src_path'], data['is_directory'], data['file_content'])
-            if data['type'] == 'modified':
-                on_modified(data['src_path'], data['is_directory'], data['file_content'])
-            if data['type'] == 'deleted':
-                on_deleted(data['src_path'], data['is_directory'])
-            if data['type'] == 'moved':
-                on_moved(data['src_path'], data['dest_path'])
+def websocket_app(directory_storage):
+    def wrap(environ, start_response):
+        ws = environ["wsgi.websocket"]
+        while not ws.closed:
+            message = ws.receive()
+            if message:
+                data = json.loads(message)
+                data['src_path'] = os.path.join(directory_storage, data['src_path'])
+                data['dest_path'] = os.path.join(directory_storage, data['dest_path'])
+                data['file_content'] = data['file_content'].decode('uu')
+                if data['type'] == 'created':
+                    on_created(data['src_path'], data['is_directory'], data['file_content'])
+                if data['type'] == 'modified':
+                    on_modified(data['src_path'], data['is_directory'], data['file_content'])
+                if data['type'] == 'deleted':
+                    on_deleted(data['src_path'], data['is_directory'])
+                if data['type'] == 'moved':
+                    on_moved(data['src_path'], data['dest_path'])
+    return wrap
 
 
 def start_server(directory, host, port):
-    DIRECTORY_STORAGE = directory
     server = pywsgi.WSGIServer(
         (host, port),
-        websocket_app,
+        websocket_app(directory),
         handler_class=WebSocketHandler,
     )
     server.serve_forever()
