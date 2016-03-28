@@ -4,7 +4,7 @@ import os
 from argparse import ArgumentParser
 from websocket_server import start_server
 from db import database
-from models import __all__
+from models import __all__, User
 
 
 parser = ArgumentParser()
@@ -21,7 +21,14 @@ parser_start.add_argument('--port', metavar='PORTA', type=int,
                           default='9000')
 parser_syncdb = subparsers.add_parser('syncdb', help='cria tabelas do banco de dados')
 parser_syncdb.set_defaults(cmd='syncdb')
+parser_createuser = subparsers.add_parser('createuser', help='cria usuário')
+parser_createuser.add_argument('username', metavar='USUÁRIO', type=str,
+                               help='nome de usuário')
+parser_createuser.add_argument('password', metavar='SENHA', type=str,
+                               help='senha do usuário')
+parser_createuser.set_defaults(cmd='createuser')
 args = parser.parse_args()
+
 if args.cmd == 'start':
     if not os.path.exists(args.directory) or not os.path.isdir(args.directory):
         parser.error("diretório para sincronização inexistente")
@@ -33,3 +40,8 @@ elif args.cmd == 'syncdb':
     print('Installing custom SQL ...')
     print('Installing indexes ...')
     print('Installed 0 object(s) from 0 fixture(s)')
+elif args.cmd == 'createuser':
+    User.create(
+        username=args.username,
+        password=args.password,
+    )
