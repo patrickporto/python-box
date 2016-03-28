@@ -10,10 +10,10 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.observer.schedule(self, 'test', recursive=True)
         self.observer.start()
 
-    def on_deleted(self, event):
+    def on_any_event(self, event):
         src = '/'.join(event.src_path.split('/')[1:])
         self.send(json.dumps({
-            'type': 'DELETE',
+            'type': event.event_type,
             'path': src,
             'is_directory': event.is_directory,
         }))
