@@ -13,15 +13,20 @@ def on_deleted(path, is_directory):
     if is_directory:
         shutil.rmtree(path, True)
     else:
-        os.remove(path)
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
 
 def websocket_app(environ, start_response):
     ws = environ["wsgi.websocket"]
-    data = json.loads(ws.receive())
-    if data['type'] == 'deleted':
-        on_deleted(data['path'], data['is_directory'])
-    ws.send(data)
+    while not ws.closed:
+        message = ws.receive()
+        if message:
+            data = json.loads(message)
+            if data['type'] == 'deleted':
+                on_deleted(data['path'], data['is_directory'])
 
 server = pywsgi.WSGIServer(
     ('0.0.0.0', 9000),

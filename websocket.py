@@ -8,14 +8,13 @@ class Client(WebSocketClient, FileSystemEventHandler):
     def __init__(self, path='', *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
         self.path = path
-
-    def __del__(self):
-        self.close(reason='Bye bye')
-
-    def opened(self):
         self.observer = Observer()
         self.observer.schedule(self, self.path, recursive=True)
-        self.observer.start()
+
+    def __del__(self):
+        self.observer.stop()
+        self.observer.join()
+        self.close(reason='Bye bye')
 
     def on_any_event(self, event):
         src = '/'.join(event.src_path.split('/')[1:])
@@ -25,10 +24,8 @@ class Client(WebSocketClient, FileSystemEventHandler):
             'is_directory': event.is_directory,
         }))
 
-    def closed(self, code, reason=None):
-        self.observer.stop()
-        self.observer.join()
-        print "Closed down", code, reason
+    def opened(self):
+        self.observer.start()
 
     def received_message(self, message):
         print(message)
