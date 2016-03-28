@@ -68,4 +68,12 @@ def start_server(directory, host, port):
         websocket_app(directory),
         handler_class=WebSocketHandler,
     )
-    server.serve_forever()
+    print('Servidor executando em http://{host}:{port}/'.format(
+        host=host,
+        port=port,
+    ))
+    print('Saia do servidor com CONTROL-C.')
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass

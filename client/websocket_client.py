@@ -1,3 +1,4 @@
+# encoding: utf-8
 import json
 from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
@@ -55,6 +56,11 @@ def start_server(path, host, port):
             protocols=['http-only', 'chat'],
         )
         ws.connect()
+        print('Sincronizando com servidor em http://{host}:{port}/'.format(
+            host=host,
+            port=port,
+        ))
+        print('Finalize a sincronização com CONTROL-C.')
         ws.run_forever()
     except KeyboardInterrupt:
         ws.close()
