@@ -17,13 +17,23 @@ pip install -r requirements.txt
 ```
 
 ## Servidor ##
-Executar servidor de sincronização.
+### Executando ###
 ```shell
-python server start pasta/de/armazenamento --host 0.0.0.0 --port 9000
+python server start DIRETÓRIO --host 0.0.0.0 --port 9000
+```
+
+### Criação de usuário ###
+```shell
+python server createuser USUÁRIO SENHA
 ```
 
 ##  Cliente ##
-Executar cliente para sincronização.
+### Sincronizando pasta com o servidor ###
 ```shell
-python client minha/pasta/com/arquivos --host 0.0.0.0 --port 9000
+python client startsync DIRETÓRIO --host 0.0.0.0 --port 9000
+```
+
+### Autenticação ###
+```shell
+python client login USUÁRIO SENHA
 ```
