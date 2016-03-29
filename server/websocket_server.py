@@ -19,6 +19,10 @@ def websocket_app(directory_storage):
                     views.monitor_events(ws, message['content'], directory_storage)
                 elif message['action'] == 'login':
                     views.auth(ws, message['content'])
+                elif message['action'] == 'get-snapshot' and valid_user(ws, message['headers']['authorization']):
+                    views.get_snapshot(ws, directory_storage)
+                elif message['action'] == 'pull' and valid_user(ws, message['headers']['authorization']):
+                    views.pull(ws, message['content'], directory_storage)
     return wrap
 
 

@@ -1,10 +1,21 @@
 # encoding: utf-8
 import json
+import os
 from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from watchdog.utils.dirsnapshot import DirectorySnapshot
 from message import Message
 from session import session
+
+
+def _writefile(path, content):
+    try:
+        f = open(path, "wb+")
+        f.write(content)
+        f.close()
+    except IOError as e:
+        print('\033[91m{0}\033[0m'.format(e))
 
 
 class Client(WebSocketClient, FileSystemEventHandler):
@@ -45,14 +56,38 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
     def opened(self):
         self.send(Message(action='check-login').dumps())
+        self.send(Message(action='get-snapshot').dumps())
         self.observer.start()
 
     def received_message(self, message):
         data = json.loads(message.data)
         error = data.get('error')
+        server_snapshot = data.get('snapshot')
+        action = data.get('action')
         if error:
             print(error)
             self.close()
+        elif server_snapshot:
+            client_snapshot = []
+            for p in DirectorySnapshot(self.path).paths:
+                path = p[len(self.path) + 1:]
+                if path:
+                    client_snapshot.append(path)
+            self.sync(server_snapshot, client_snapshot)
+        elif action == 'created':
+            src_path = os.path.join(self.path, data.get('src_path'))
+            file_content = data.get('file_content').decode('uu')
+            if data.get('is_directory'):
+                os.makedirs(src_path)
+            else:
+                _writefile(src_path, file_content)
+
+    def sync(self, server_snapshot, client_snapshot):
+        server_created = [item for item in server_snapshot if not item in client_snapshot]
+        pull_context = {
+            'created': server_created,
+        }
+        self.send(Message(action='pull', content=pull_context).dumps())
 
 
 def start_server(path, host, port):

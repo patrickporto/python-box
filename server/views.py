@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+from watchdog.utils.dirsnapshot import DirectorySnapshot
 from auth import authenticate, login
 
 
@@ -61,4 +62,29 @@ def auth(ws, data):
     }
     if user is not None:
         data['token'] = login(user)
+    ws.send(json.dumps(data))
+
+
+def pull(ws, data, directory_storage):
+    for path in data['created']:
+        path_root = os.path.join(directory_storage, path)
+        data = {
+            'action': 'created',
+            'src_path': path,
+            'is_directory': os.path.isdir(path_root),
+            'file_content': open(path_root, 'rb').read().encode('uu'),
+        }
+        ws.send(json.dumps(data))
+
+
+def get_snapshot(ws, directory_storage):
+    snapshot = DirectorySnapshot(path=directory_storage, recursive=True)
+    paths = []
+    for p in snapshot.paths:
+        path = p[len(directory_storage) + 1:]
+        if path:
+            paths.append(path)
+    data = {
+        'snapshot': paths,
+    }
     ws.send(json.dumps(data))
