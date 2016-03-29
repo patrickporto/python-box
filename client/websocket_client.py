@@ -182,3 +182,26 @@ def login(username, password, host, port):
         ws.run_forever()
     except KeyboardInterrupt:
         ws.close()
+
+
+class ListClient(WebSocketClient):
+    def opened(self):
+        self.send(Message(action='get-list').dumps())
+
+    def received_message(self, message):
+        data = json.loads(message.data)
+        for info in data:
+            print(u'[{date_created}:{last_update}][{user}] {path}'.format(**info))
+        self.close()
+
+
+def get_list(host, port):
+    try:
+        ws = ListClient(
+            url='ws://{host}:{port}/'.format(host=host, port=port),
+            protocols=['http-only', 'chat'],
+        )
+        ws.connect()
+        ws.run_forever()
+    except KeyboardInterrupt:
+        ws.close()

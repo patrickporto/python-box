@@ -28,9 +28,14 @@ def on_created(path, is_directory, file_content, user):
     file_uploaded.save()
 
 
-def on_modified(path, is_directory, file_content):
+def on_modified(path, is_directory, file_content, user):
     if not is_directory:
         _writefile(path, file_content)
+        file_uploaded = FileUploaded.get(
+            path=path,
+        )
+        file_uploaded.user = user
+        file_uploaded.save()
 
 
 def on_deleted(path, is_directory):
@@ -42,11 +47,20 @@ def on_deleted(path, is_directory):
             os.remove(path)
         except OSError:
             pass
+    file_uploaded = FileUploaded.get(
+        path=path,
+    )
+    file_uploaded.delete_instance()
 
 
 def on_moved(src_path, dest_path):
     if os.path.exists(src_path):
         shutil.move(src_path, dest_path)
+        file_uploaded = FileUploaded.get(
+            path=src_path,
+        )
+        file_uploaded.path = dest_path
+        file_uploaded.save()
 
 
 def monitor_events(ws, data, directory_storage, user):
@@ -56,7 +70,7 @@ def monitor_events(ws, data, directory_storage, user):
     if data['type'] == 'created':
         on_created(data['src_path'], data['is_directory'], data['file_content'], user)
     elif data['type'] == 'modified':
-        on_modified(data['src_path'], data['is_directory'], data['file_content'])
+        on_modified(data['src_path'], data['is_directory'], data['file_content'], user)
     elif data['type'] == 'deleted':
         on_deleted(data['src_path'], data['is_directory'])
     elif data['type'] == 'moved':
@@ -104,4 +118,16 @@ def get_snapshot(ws, directory_storage):
     data = {
         'snapshot': paths,
     }
+    ws.send(json.dumps(data))
+
+
+def get_list(ws, directory_storage):
+    data = []
+    for uploaded in FileUploaded.select():
+        data.append({
+            'user': uploaded.user.username,
+            'path': uploaded.path[len(directory_storage) + 1:],
+            'date_created': str(uploaded.date_created),
+            'last_update': str(uploaded.last_update),
+        })
     ws.send(json.dumps(data))

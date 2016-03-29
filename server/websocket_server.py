@@ -29,6 +29,9 @@ def websocket_app(directory_storage):
                 elif message['action'] == 'push' and valid_user(ws, message['headers']['authorization']):
                     user = get_user(message['headers']['authorization'])
                     views.push(ws, message['content'], directory_storage, user)
+                elif message['action'] == 'get-list' and valid_user(ws, message['headers']['authorization']):
+                    views.get_list(ws, directory_storage)
+
     return wrap
 
 

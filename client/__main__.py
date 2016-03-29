@@ -1,7 +1,7 @@
 # encoding: utf-8
 import os
 from argparse import ArgumentParser
-from websocket_client import start_server, login
+from websocket_client import start_server, login, get_list
 
 
 parser = ArgumentParser()
@@ -30,6 +30,15 @@ parser_login.add_argument('--port', metavar='PORTA', type=int,
                           default='9000')
 parser_login.set_defaults(cmd='login')
 
+parser_list = subparsers.add_parser('list', help='lista informações das pastas e arquivos')
+parser_list.add_argument('--host', metavar='SERVIDOR', type=str,
+                         help='endereço do servidor (padrão: localhost)',
+                         default='localhost')
+parser_list.add_argument('--port', metavar='PORTA', type=int,
+                         help='porta do servidor (padrão: 9000)',
+                         default='9000')
+parser_list.set_defaults(cmd='list')
+
 args = parser.parse_args()
 
 if args.cmd == 'startsync':
@@ -38,3 +47,5 @@ if args.cmd == 'startsync':
     start_server(args.directory, args.host, args.port)
 elif args.cmd == 'login':
     login(args.username, args.password, args.host, args.port)
+elif args.cmd == 'list':
+    get_list(args.host, args.port)
