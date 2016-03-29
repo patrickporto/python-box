@@ -16,7 +16,8 @@ def _writefile(path, content):
 
 def on_created(path, is_directory, file_content):
     if is_directory:
-        os.makedirs(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
     else:
         _writefile(path, file_content)
 
