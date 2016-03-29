@@ -4,3 +4,4 @@ gevent
 ws4py
 peewee
 bcrypt
+pyjwt

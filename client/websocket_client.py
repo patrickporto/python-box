@@ -3,6 +3,7 @@ import json
 from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from message import Message
 
 
 class Client(WebSocketClient, FileSystemEventHandler):
@@ -39,7 +40,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
             context['dest_path'] = event.dest_path[len(self.path) + 1:]
         print('sincronizando')
         context['file_content'] = context['file_content'].encode('uu')
-        self.send(json.dumps(context, ensure_ascii=False))
+        self.send(Message(content=context, action='monitor-events').dumps())
 
     def opened(self):
         self.observer.start()
@@ -50,7 +51,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
 def start_server(path, host, port):
     try:
-        ws = Client(
+        ws = WebSocketClient(
             url='ws://{host}:{port}/'.format(host=host, port=port),
             path=path,
             protocols=['http-only', 'chat'],
@@ -61,6 +62,43 @@ def start_server(path, host, port):
             port=port,
         ))
         print('Finalize a sincronização com CONTROL-C.')
+        ws.run_forever()
+    except KeyboardInterrupt:
+        ws.close()
+
+
+class AuthClient(WebSocketClient):
+    def __init__(self, username, password, *args, **kwargs):
+        super(AuthClient, self).__init__(*args, **kwargs)
+        self.username = username
+        self.password = password
+
+    def opened(self):
+        context = {
+            'username': self.username,
+            'password': self.password,
+        }
+        self.send(Message(content=context, action='login').dumps())
+
+    def received_message(self, message):
+        data = json.loads(message.data)
+        token = data['token']
+        if token is not None:
+            print(token)
+        else:
+            print("O usuário e a senha estão incorretos.")
+        self.close()
+
+
+def login(username, password, host, port):
+    try:
+        ws = AuthClient(
+            url='ws://{host}:{port}/'.format(host=host, port=port),
+            protocols=['http-only', 'chat'],
+            username=username,
+            password=password,
+        )
+        ws.connect()
         ws.run_forever()
     except KeyboardInterrupt:
         ws.close()
