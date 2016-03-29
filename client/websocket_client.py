@@ -44,6 +44,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.send(Message(content=context, action='monitor-events').dumps())
 
     def opened(self):
+        self.send(Message(action='check-login').dumps())
         self.observer.start()
 
     def received_message(self, message):

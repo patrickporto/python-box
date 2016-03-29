@@ -25,6 +25,9 @@ def get_user(token):
 
 
 def valid_user(ws, token):
+    if not token:
+        ws.send('O usuário precisa estar autenticado')
+        return False
     try:
         user = get_user(token)
         if user is None:
