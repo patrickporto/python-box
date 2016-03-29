@@ -3,6 +3,7 @@ import json
 import shutil
 from watchdog.utils.dirsnapshot import DirectorySnapshot
 from auth import authenticate, login
+from models import FileUploaded
 
 
 def _writefile(path, content):
@@ -14,12 +15,17 @@ def _writefile(path, content):
         print('\033[91m{0}\033[0m'.format(e))
 
 
-def on_created(path, is_directory, file_content):
+def on_created(path, is_directory, file_content, user):
     if is_directory:
         if not os.path.exists(path):
             os.makedirs(path)
     else:
         _writefile(path, file_content)
+    (file_uploaded, created) = FileUploaded.get_or_create(
+        path=path,
+    )
+    file_uploaded.user = user
+    file_uploaded.save()
 
 
 def on_modified(path, is_directory, file_content):
@@ -43,12 +49,12 @@ def on_moved(src_path, dest_path):
         shutil.move(src_path, dest_path)
 
 
-def monitor_events(ws, data, directory_storage):
+def monitor_events(ws, data, directory_storage, user):
     data['src_path'] = os.path.join(directory_storage, data['src_path'])
     data['dest_path'] = os.path.join(directory_storage, data['dest_path'])
     data['file_content'] = data['file_content'].decode('uu')
     if data['type'] == 'created':
-        on_created(data['src_path'], data['is_directory'], data['file_content'])
+        on_created(data['src_path'], data['is_directory'], data['file_content'], user)
     elif data['type'] == 'modified':
         on_modified(data['src_path'], data['is_directory'], data['file_content'])
     elif data['type'] == 'deleted':
@@ -82,10 +88,10 @@ def pull(ws, data, directory_storage):
         ws.send(json.dumps(data))
 
 
-def push(ws, data, directory_storage):
+def push(ws, data, directory_storage, user):
     data['src_path'] = os.path.join(directory_storage, data['src_path'])
     data['file_content'] = data['file_content'].decode('uu')
-    on_created(data['src_path'], data['is_directory'], data['file_content'])
+    on_created(data['src_path'], data['is_directory'], data['file_content'], user)
 
 
 def get_snapshot(ws, directory_storage):

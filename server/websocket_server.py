@@ -3,7 +3,7 @@ import json
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 from websocket_monitor import MonitorEvents
-from auth import valid_user
+from auth import valid_user, get_user
 import views
 
 
@@ -18,7 +18,8 @@ def websocket_app(directory_storage):
                 if message['action'] == 'check-login':
                     valid_user(ws, message['headers']['authorization'])
                 elif message['action'] == 'monitor-events' and valid_user(ws, message['headers']['authorization']):
-                    views.monitor_events(ws, message['content'], directory_storage)
+                    user = get_user(message['headers']['authorization'])
+                    views.monitor_events(ws, message['content'], directory_storage, user)
                 elif message['action'] == 'login':
                     views.auth(ws, message['content'])
                 elif message['action'] == 'get-snapshot' and valid_user(ws, message['headers']['authorization']):
@@ -26,7 +27,8 @@ def websocket_app(directory_storage):
                 elif message['action'] == 'pull' and valid_user(ws, message['headers']['authorization']):
                     views.pull(ws, message['content'], directory_storage)
                 elif message['action'] == 'push' and valid_user(ws, message['headers']['authorization']):
-                    views.push(ws, message['content'], directory_storage)
+                    user = get_user(message['headers']['authorization'])
+                    views.push(ws, message['content'], directory_storage, user)
     return wrap
 
 

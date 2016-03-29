@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 from websocket_server import start_server
 from db import database
 from models import __all__, User
+import migrations
 
 
 parser = ArgumentParser()
@@ -35,11 +36,11 @@ if args.cmd == 'start':
     start_server(args.directory, args.host, args.port)
 elif args.cmd == 'syncdb':
     database.connect()
-    print('Creating tables ...')
+    print('Criando tabelas ...')
     database.create_tables(__all__)
-    print('Installing custom SQL ...')
-    print('Installing indexes ...')
-    print('Installed 0 object(s) from 0 fixture(s)')
+    print('Executando migrações ...')
+    migrations.createuser_system()
+    print('Pronto')
 elif args.cmd == 'createuser':
     User.create(
         username=args.username,
