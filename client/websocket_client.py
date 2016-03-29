@@ -1,6 +1,7 @@
 # encoding: utf-8
 import json
 import os
+import shutil
 from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -61,6 +62,8 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.observer.start()
 
     def received_message(self, message):
+        self.observer.stop()
+        self.observer.join()
         data = json.loads(message.data)
         error = data.get('error')
         server_snapshot = data.get('snapshot')
@@ -78,10 +81,32 @@ class Client(WebSocketClient, FileSystemEventHandler):
         elif action == 'created':
             src_path = os.path.join(self.path, data.get('src_path'))
             file_content = data.get('file_content').decode('uu')
-            if data.get('is_directory'):
+            if data.get('is_directory') and not os.path.exists(src_path):
                 os.makedirs(src_path)
-            else:
+            elif not os.path.exists(src_path):
                 _writefile(src_path, file_content)
+        elif action == 'modified':
+            src_path = os.path.join(self.path, data.get('src_path'))
+            if not data.get('is_directory') and os.path.exists(src_path):
+                file_content = data.get('file_content').decode('uu')
+                _writefile(src_path, file_content)
+        elif action == 'deleted':
+            src_path = os.path.join(self.path, data.get('src_path'))
+            if data.get('is_directory'):
+                shutil.rmtree(src_path, True)
+            else:
+                try:
+                    os.remove(src_path)
+                except OSError:
+                    pass
+        elif action == 'moved':
+            src_path = os.path.join(self.path, data['src_path'])
+            dest_path = os.path.join(self.path, data['dest_path'])
+            if os.path.exists(src_path):
+                shutil.move(src_path, dest_path)
+        self.observer = Observer()
+        self.observer.schedule(self, self.path, recursive=True)
+        self.observer.start()
 
     def sync(self, server_snapshot, client_snapshot):
         server_created = [item for item in server_snapshot if not item in client_snapshot]

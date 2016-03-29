@@ -2,6 +2,7 @@
 import json
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
+from websocket_monitor import MonitorEvents
 from auth import valid_user
 import views
 
@@ -9,6 +10,7 @@ import views
 def websocket_app(directory_storage):
     def wrap(environ, start_response):
         ws = environ["wsgi.websocket"]
+        MonitorEvents(ws, directory_storage)
         while not ws.closed:
             message = ws.receive()
             if message:

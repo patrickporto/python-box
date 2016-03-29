@@ -39,7 +39,8 @@ def on_deleted(path, is_directory):
 
 
 def on_moved(src_path, dest_path):
-    shutil.move(src_path, dest_path)
+    if os.path.exists(src_path):
+        shutil.move(src_path, dest_path)
 
 
 def monitor_events(ws, data, directory_storage):
