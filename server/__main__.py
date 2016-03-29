@@ -45,3 +45,4 @@ elif args.cmd == 'createuser':
         username=args.username,
         password=args.password,
     )
+    print('Usuário criado com sucesso.')
