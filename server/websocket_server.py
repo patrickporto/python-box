@@ -11,6 +11,7 @@ def websocket_app(directory_storage):
             message = ws.receive()
             if message:
                 message = json.loads(message)
+                print(message['headers']['authorization'])
                 if message['action'] == 'monitor-events':
                     views.monitor_events(ws, message['content'], directory_storage)
                 elif message['action'] == 'login':

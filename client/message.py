@@ -1,4 +1,5 @@
 import json
+from session import session
 
 
 class Message(object):
@@ -11,12 +12,13 @@ class Message(object):
         return self.dumps()
 
     def dumps(self):
+        self._headers['authorization'] = session['user']
         data = {
             'action': self._action,
             'headers': self._headers,
             'content': self._content,
         }
-        return json.dumps(data, ensure_ascii=False)
+        return json.dumps(data)
 
     def loads(self, message):
         data = json.loads(message)

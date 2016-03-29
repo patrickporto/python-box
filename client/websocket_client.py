@@ -4,6 +4,7 @@ from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from message import Message
+from session import session
 
 
 class Client(WebSocketClient, FileSystemEventHandler):
@@ -51,7 +52,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
 def start_server(path, host, port):
     try:
-        ws = WebSocketClient(
+        ws = Client(
             url='ws://{host}:{port}/'.format(host=host, port=port),
             path=path,
             protocols=['http-only', 'chat'],
@@ -84,7 +85,8 @@ class AuthClient(WebSocketClient):
         data = json.loads(message.data)
         token = data['token']
         if token is not None:
-            print(token)
+            session['user'] = token
+            print("autenticado com sucesso.")
         else:
             print("O usuário e a senha estão incorretos.")
         self.close()
