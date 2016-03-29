@@ -1,5 +1,6 @@
 # encoding: utf-8
 import jwt
+import json
 from models import User
 import settings
 
@@ -26,13 +27,13 @@ def get_user(token):
 
 def valid_user(ws, token):
     if not token:
-        ws.send('O usuário precisa estar autenticado')
+        ws.send(json.dumps({'error': 'O usuário precisa estar autenticado'}))
         return False
     try:
         user = get_user(token)
         if user is None:
-            ws.send('O usuário desconhecido')
+            ws.send(json.dumps({'error': 'O usuário desconhecido'}))
         return user is not None
     except jwt.DecodeError:
-        ws.send('O usuário precisa estar autenticado')
+        ws.send(json.dumps({'error': 'O usuário precisa estar autenticado'}))
     return False

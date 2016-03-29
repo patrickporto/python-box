@@ -48,8 +48,11 @@ class Client(WebSocketClient, FileSystemEventHandler):
         self.observer.start()
 
     def received_message(self, message):
-        print(message)
-        self.close()
+        data = json.loads(message.data)
+        error = data.get('error')
+        if error:
+            print(error)
+            self.close()
 
 
 def start_server(path, host, port):
