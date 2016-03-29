@@ -48,6 +48,7 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
     def received_message(self, message):
         print(message)
+        self.close()
 
 
 def start_server(path, host, port):
