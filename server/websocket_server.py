@@ -23,6 +23,8 @@ def websocket_app(directory_storage):
                     views.get_snapshot(ws, directory_storage)
                 elif message['action'] == 'pull' and valid_user(ws, message['headers']['authorization']):
                     views.pull(ws, message['content'], directory_storage)
+                elif message['action'] == 'push' and valid_user(ws, message['headers']['authorization']):
+                    views.push(ws, message['content'], directory_storage)
     return wrap
 
 

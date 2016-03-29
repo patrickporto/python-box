@@ -5,6 +5,7 @@ from ws4py.client.threadedclient import WebSocketClient
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from watchdog.utils.dirsnapshot import DirectorySnapshot
+from utils import force_unicode
 from message import Message
 from session import session
 
@@ -67,12 +68,12 @@ class Client(WebSocketClient, FileSystemEventHandler):
         if error:
             print(error)
             self.close()
-        elif server_snapshot:
+        elif server_snapshot is not None:
             client_snapshot = []
             for p in DirectorySnapshot(self.path).paths:
                 path = p[len(self.path) + 1:]
                 if path:
-                    client_snapshot.append(path)
+                    client_snapshot.append(force_unicode(path))
             self.sync(server_snapshot, client_snapshot)
         elif action == 'created':
             src_path = os.path.join(self.path, data.get('src_path'))
@@ -84,10 +85,22 @@ class Client(WebSocketClient, FileSystemEventHandler):
 
     def sync(self, server_snapshot, client_snapshot):
         server_created = [item for item in server_snapshot if not item in client_snapshot]
-        pull_context = {
-            'created': server_created,
-        }
-        self.send(Message(action='pull', content=pull_context).dumps())
+        client_created = [item for item in client_snapshot if not item in server_snapshot]
+        print('sincronizando')
+        print('baixa {0} novos arquivos'.format(len(server_created)))
+        self.send(Message(action='pull', content=server_created).dumps())
+        print('subindo {0} novos arquivos'.format(len(client_created)))
+        for path in client_created:
+            path_root = os.path.join(self.path, path)
+            data = {
+                'src_path': path,
+                'is_directory': os.path.isdir(path_root),
+                'file_content': '',
+            }
+            if not data['is_directory']:
+                data['file_content'] = open(path_root, 'rb').read()
+            data['file_content'] = data['file_content'].encode('uu')
+            self.send(Message(action='push', content=data).dumps())
 
 
 def start_server(path, host, port):

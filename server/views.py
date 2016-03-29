@@ -66,15 +66,24 @@ def auth(ws, data):
 
 
 def pull(ws, data, directory_storage):
-    for path in data['created']:
+    for path in data:
         path_root = os.path.join(directory_storage, path)
         data = {
             'action': 'created',
             'src_path': path,
             'is_directory': os.path.isdir(path_root),
-            'file_content': open(path_root, 'rb').read().encode('uu'),
+            'file_content': '',
         }
+        if not data['is_directory']:
+            data['file_content'] = open(path_root, 'rb').read()
+        data['file_content'] = data['file_content'].encode('uu')
         ws.send(json.dumps(data))
+
+
+def push(ws, data, directory_storage):
+    data['src_path'] = os.path.join(directory_storage, data['src_path'])
+    data['file_content'] = data['file_content'].decode('uu')
+    on_created(data['src_path'], data['is_directory'], data['file_content'])
 
 
 def get_snapshot(ws, directory_storage):
